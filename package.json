@@ -1,0 +1,26 @@
+{
+  "name": "driftline",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=@driftline/web",
+    "dev:server": "npm run dev --workspace=@driftline/server",
+    "dev:agent": "npm run dev --workspace=@driftline/agent",
+    "build": "npm run build --workspaces"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabrielaiduarte/driftline.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gabrielaiduarte/driftline/issues"
+  },
+  "homepage": "https://github.com/gabrielaiduarte/driftline#readme"
+}
