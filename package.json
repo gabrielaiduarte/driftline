@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/gabrielaiduarte/driftline/issues"
   },
-  "homepage": "https://github.com/gabrielaiduarte/driftline#readme"
+  "homepage": "https://github.com/gabrielaiduarte/driftline#readme",
+  "devDependencies": {
+    "supabase": "^2.117.0"
+  }
 }
