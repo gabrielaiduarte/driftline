@@ -1,5 +1,6 @@
 import express from "express"
 import cors from "cors"
+import { requireAuth, type AuthenticatedRequest } from "./middleware/auth.js"
 
 const app = express()
 const PORT = 3001
@@ -15,6 +16,15 @@ app.get("/health", (_req, res) => {
     res.json({
         status: "ok",
         service: "driftline-server",
+    })
+})
+
+app.get("/api/me", requireAuth, (req, res) => {
+    const authenticatedReq = req as AuthenticatedRequest
+
+    res.json({
+        id: authenticatedReq.user.id,
+        email: authenticatedReq.user.email,
     })
 })
 
