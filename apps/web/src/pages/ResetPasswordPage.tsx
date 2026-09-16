@@ -1,8 +1,14 @@
-import { useState, type SubmitEvent } from "react"
+import { useState, useEffect, type SubmitEvent } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabase"
 import { Check } from "lucide-react"
 import "./ResetPasswordPage.css"
+
+type RecoveryStatus =
+    | "checking"
+    | "valid"
+    | "invalid"
+    | "updated"
 
 export default function ResetPasswordPage() {
 
@@ -12,7 +18,41 @@ export default function ResetPasswordPage() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
-    const [isPasswordUpdated, setIsPasswordUpdated] = useState(false)
+    const [recoveryStatus, setRecoveryStatus] = useState<RecoveryStatus>("checking")
+
+    useEffect(() => {
+        let recoveryDetected = false
+
+        /**
+         * Supabase emits PASSWORD_RECOVERY alongside the reset link
+         * Normal visit (from search) shouldn't trigger it
+         */
+
+        const {
+            data: {subscription},
+        } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === "PASSWORD_RECOVERY" && session) {
+                recoveryDetected = true
+                setRecoveryStatus("valid")
+            }
+        })
+
+        async function checkRecoverySession() {
+            // Supabase may need time to process auth info 
+            await new Promise((resolve) => setTimeout(resolve, 500))
+
+            if (!recoveryDetected) {
+                setRecoveryStatus("invalid")
+            }
+        }
+
+        checkRecoverySession()
+
+        // Prevent auth listener from remaining active after page unmounts
+        return () => {
+            subscription.unsubscribe()
+        }
+    }, [])
 
     async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -50,20 +90,71 @@ export default function ResetPasswordPage() {
         await supabase.auth.signOut()
 
         setIsLoading(false)
-        setIsPasswordUpdated(true)
+        setRecoveryStatus("updated")
     }
 
-    if (isPasswordUpdated) {
+    if (recoveryStatus === "checking") {
+        return (
+            <main className="reset-password-page">
+                <section className="reset-password-card">
+
+                    <div className="reset-password-brand">
+                        <div className="reset-password-brand-mark">D</div>
+                        <span className="reset-password-brand-name">Driftline</span>
+                    </div>
+
+                    <h1 className="reset-password-title">
+                        Verifying reset link...
+                    </h1>
+
+                    <p className="reset-password-description">
+                        Please wait while we verify your password reset request
+                    </p>
+
+                </section>
+            </main>
+        )
+    }
+
+    if (recoveryStatus === "invalid") {
+        return (
+            <main className="reset-password-page">
+                <section className="reset-password-card">
+
+                    <div className="reset-password-brand">
+                        <div className="reset-password-brand-mark">D</div>
+                        <span className="reset-password-brand-name">Driftline</span>
+                    </div>
+
+                    <h1 className="reset-password-title">
+                        Reset link invalid or expired
+                    </h1>
+
+                    <p className="reset-password-description">
+                        Request a new password reset link from the sign-in page
+                    </p>
+
+                    <button
+                        className="reset-password-button"
+                        type="button"
+                        onClick={() => navigate("/signin", { replace: true})}
+                    >
+                        Back to sign in
+                    </button>
+
+                </section>
+            </main>
+        )
+    }
+
+    if (recoveryStatus === "updated") {
         return (
             <main className="reset-password-page">
                 <section className="reset-password-card reset-password-success">
 
                     <div className="reset-password-brand">
-
                         <div className="reset-password-brand-mark">D</div>
-
                         <span className="reset-password-brand-name">Driftline</span>
-
                     </div>
 
                     <div className="reset-password-success-icon" aria-hidden="true">
@@ -82,10 +173,11 @@ export default function ResetPasswordPage() {
                     <button
                         className="reset-password-button"
                         type="button"
-                        onClick={() => navigate("/signin", { replace: true })}
+                        onClick={() => navigate("/signin", { replace: true})}
                     >
                         Back to sign in
                     </button>
+
                 </section>
             </main>
         )
