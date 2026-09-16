@@ -39,6 +39,7 @@ const authStorage = {
     },
 
     removeItem(key: string) : void {
+        // When signin out session must be rmeoved from both storages
         localStorage.removeItem(key)
         sessionStorage.removeItem(key)
     }

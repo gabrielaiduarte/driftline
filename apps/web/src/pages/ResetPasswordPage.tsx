@@ -43,6 +43,10 @@ export default function ResetPasswordPage() {
             return
         }
 
+        /**
+         * End recovery session after pw is changed 
+         * User should sign in normally with new pw
+         */
         await supabase.auth.signOut()
 
         setIsLoading(false)

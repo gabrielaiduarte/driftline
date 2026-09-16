@@ -12,6 +12,11 @@ export default function IncidentsPage() {
     async function handleSignOut() {
         setIsSigninOut(true)
 
+        /**
+         * Supabase clears auth session through storage adapter
+         * regardless of storage (local or session)
+         */
+
         const { error } = await supabase.auth.signOut()
 
         if (error) {

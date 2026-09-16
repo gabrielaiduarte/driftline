@@ -9,6 +9,7 @@ export default function App() {
   return (
     <Routes>
 
+      {/* Authenticated users are redirected away from signin page */}
       <Route 
         path="/signin" 
         element={
@@ -18,11 +19,16 @@ export default function App() {
         } 
       />
 
+      {/**
+       * Pass recovery is separate from PublicOnlyRoute bc Supabase recovery link
+       * establishes special auth session
+       */}
       <Route
         path="/reset-password"
         element={<ResetPasswordPage />}
       />
 
+      {/* Application routes require auth Supabase session */}
       <Route
         path="/incidents"
         element={

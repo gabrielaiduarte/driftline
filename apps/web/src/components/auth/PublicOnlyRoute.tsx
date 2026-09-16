@@ -8,6 +8,9 @@ type PublicOnlyRouteProps = {
 
 export default function PublicOnlyRoute({ children }: PublicOnlyRouteProps) {
 
+    /**
+     * Null is for the time before supabase has determined whetehr theres a stored session
+     */
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
     useEffect(() => {
@@ -32,6 +35,10 @@ export default function PublicOnlyRoute({ children }: PublicOnlyRouteProps) {
         }
     }, [])
 
+    /**
+     * Sign in is public only so an already authenticated user
+     * should not see the login form
+     */
     if (isAuthenticated) {
         return <Navigate to="/incidents" replace />
     }

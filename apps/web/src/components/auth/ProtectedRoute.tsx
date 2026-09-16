@@ -8,10 +8,18 @@ type ProtectedRouteProps = {
 
 export default function ProtectedRoute({ children } : ProtectedRouteProps) {
 
+    /**
+     * Null is for when supabase hasnt finished checking the session
+     * Prevents teh brief rendering of a protected page before knowing about auth
+     */
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
     useEffect(() => {
         async function checkSession() {
+            /**
+             * Restore existing session when route loads
+             * Session may come from either storage through custom auth adapter
+             */
             const {
                 data: { session },
             } = await supabase.auth.getSession()
@@ -28,6 +36,7 @@ export default function ProtectedRoute({ children } : ProtectedRouteProps) {
             setIsAuthenticated(Boolean(session))
         })
 
+        // Remove Supabase listener when route guard unmounts
         return () => {
             subscription.unsubscribe()
         }

@@ -20,6 +20,8 @@ export default function SignInForm() {
         setErrorMessage(null)
         setSuccessMessage(null)
         setIsLoading(true)
+        // Set persistence pref before auth, supabase will store new session 
+        // as part of sign in
         setRememberMe(rememberMe)
 
         // Supabase takes care of credential verification and session creation
@@ -35,6 +37,7 @@ export default function SignInForm() {
         }
 
         setIsLoading(false)
+        // 'replace' prevent the sign in submission from beocming another browser history entry 
         navigate("/incidents", { replace: true})
     }
 
@@ -49,6 +52,11 @@ export default function SignInForm() {
 
         setIsResetLoading(true)
 
+        /*
+         * Supabase emails user recovery link
+         * Supabase verifies link, redirects browser to the reset page
+         * with an authenticated recovery session 
+        */
         const { error } = await supabase.auth.resetPasswordForEmail(
             email.trim(),
         {
