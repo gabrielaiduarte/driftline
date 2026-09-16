@@ -1,5 +1,5 @@
 import { useState, type SubmitEvent } from "react";
-import { supabase } from "../../lib/supabase";
+import { setRememberMe, supabase } from "../../lib/supabase";
 import "./SignInForm.css"
 
 export default function SignInForm() {
@@ -8,11 +8,13 @@ export default function SignInForm() {
     const [password, setPassword] = useState("")
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false)
+    const [rememberMe, setRememberMeState] = useState(false)
 
     async function handleSubmit( event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault()
         setErrorMessage(null)
         setIsLoading(true)
+        setRememberMe(rememberMe)
 
         // Supabase takes care of credential verification and session creation
         const { error } = await supabase.auth.signInWithPassword({
@@ -74,7 +76,8 @@ export default function SignInForm() {
                 <input
                     className="signin-checkbox"
                     type="checkbox"
-                    defaultChecked
+                    checked={rememberMe}
+                    onChange={(event) => setRememberMeState(event.target.checked)}
                 />
                 <span>Keep me signed in</span>
             </label>
