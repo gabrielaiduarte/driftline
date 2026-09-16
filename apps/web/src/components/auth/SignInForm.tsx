@@ -1,18 +1,24 @@
 import { useState, type SubmitEvent } from "react";
 import { setRememberMe, supabase } from "../../lib/supabase";
+import { useNavigate } from "react-router-dom";
 import "./SignInForm.css"
 
 export default function SignInForm() {
+
+    const navigate = useNavigate()
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("")
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false)
     const [rememberMe, setRememberMeState] = useState(false)
+    const [successMessage, setSuccessMessage] = useState<string | null>(null)
+    const [isResetLoading, setIsResetLoading] = useState(false)
 
     async function handleSubmit( event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault()
         setErrorMessage(null)
+        setSuccessMessage(null)
         setIsLoading(true)
         setRememberMe(rememberMe)
 
@@ -29,9 +35,34 @@ export default function SignInForm() {
         }
 
         setIsLoading(false)
+        navigate("/incidents", { replace: true})
+    }
 
-        // Temp: we need authenticated routing
-        console.log("Signed in successfully")
+    async function handleForgotPassword() {
+        setErrorMessage(null)
+        setSuccessMessage(null)
+
+        if (!email.trim()) {
+            setErrorMessage("Enter your email address before requesting a password reset")
+            return
+        }
+
+        setIsResetLoading(true)
+
+        const { error } = await supabase.auth.resetPasswordForEmail(
+            email.trim(),
+        {
+            redirectTo: `${window.location.origin}/reset-password`,
+        })
+
+        if (error) {
+            setErrorMessage(error.message)
+            setIsResetLoading(false)
+            return
+        }
+
+        setSuccessMessage("Check your email for a password reset link")
+        setIsResetLoading(false)
     }
 
     return (
@@ -86,10 +117,14 @@ export default function SignInForm() {
                 <p className="signin-error" role="alert">{errorMessage}</p>
             )}
 
+            {successMessage && (
+                <p className="signin-success" role="status">{successMessage}</p>
+            )}
+
             <button
                 className="signin-button"
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isResetLoading}
             >
                 {isLoading ? "Signing in..." : "Sign in"}
             </button>
@@ -97,8 +132,10 @@ export default function SignInForm() {
             <button 
                 className="signin-forgot-password"
                 type="button"
+                onClick={handleForgotPassword}
+                disabled={isLoading || isResetLoading}
             >
-                Forgot your password?
+                {isResetLoading ? "Sending reset link..." : "Forgot your password?"}
             </button>
         </form>
     )

@@ -97,3 +97,9 @@
 .signin-forgot-password:hover {
   text-decoration: underline;
 }
+
+.signin-success {
+  margin: 0;
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+}
